@@ -10,7 +10,9 @@ from frappe.utils import (
 	get_first_day_of_week,
 	get_first_day,
 	get_quarter_start,
-	get_year_start, getdate,
+	get_year_start,
+	getdate,
+	cint,
 )
 import datetime
 
@@ -19,6 +21,7 @@ class PowerBIReportSource(Document):
 	def get_report_content(self, limit=None, user_filters=None):
 		report = frappe.get_doc("Report", self.report)
 
+		limit = cint(limit)
 		self.prepare_filters(user_filters)
 
 		columns, data = report.get_data(
@@ -29,6 +32,8 @@ class PowerBIReportSource(Document):
 			ignore_prepared_report=True,
 			are_default_filters=False,
 		)
+		if limit and self.report_type != "Report Builder":
+			data = data[:limit]
 
 		if self.report_type == "Script Report":
 			from frappe.desk.query_report import flatten_grouped_report_data

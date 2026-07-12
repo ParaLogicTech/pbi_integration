@@ -10,6 +10,7 @@
   "report",
   "user",
   "enabled",
+  "pause_auto_refresh",
   "column_break_4",
   "report_type",
   "reference_report",
@@ -22,13 +23,37 @@
   "to_date_field",
   "column_break_17",
   "dynamic_date_period",
-  "use_first_day_of_period"
+  "use_first_day_of_period",
+  "report_generation_section",
+  "generation_method",
+  "refresh_frequency",
+  "weekly_monday",
+  "weekly_tuesday",
+  "weekly_wednesday",
+  "weekly_thursday",
+  "weekly_friday",
+  "weekly_saturday",
+  "weekly_sunday",
+  "column_break_7xqq",
+  "grace_duration",
+  "refresh_schedule",
+  "column_break_nfvk",
+  "last_refresh_dt",
+  "next_refresh_dt",
+  "last_execution_time",
+  "report_contents_file",
+  "is_executing",
+  "preview_json",
+  "error_section",
+  "retry",
+  "error"
  ],
  "fields": [
   {
    "fieldname": "report",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Report",
    "options": "Report",
    "reqd": 1,
@@ -39,6 +64,7 @@
    "fieldname": "user",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Based on Permissions For User",
    "options": "User",
    "reqd": 1
@@ -47,6 +73,7 @@
    "default": "1",
    "fieldname": "enabled",
    "fieldtype": "Check",
+   "in_standard_filter": 1,
    "label": "Enabled"
   },
   {
@@ -126,11 +153,180 @@
    "fieldname": "use_first_day_of_period",
    "fieldtype": "Check",
    "label": "Use First Day of Period"
+  },
+  {
+   "fieldname": "report_generation_section",
+   "fieldtype": "Section Break",
+   "label": "Report Generation"
+  },
+  {
+   "default": "On Request",
+   "fieldname": "generation_method",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Report Generation Method",
+   "options": "On Request\nPeriodic Refresh",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_7xqq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.generation_method == \"Periodic Refresh\"",
+   "fieldname": "refresh_frequency",
+   "fieldtype": "Select",
+   "label": "Refresh Frequency",
+   "mandatory_depends_on": "eval:doc.generation_method == \"Periodic Refresh\"",
+   "options": "\nDaily\nWeekly"
+  },
+  {
+   "depends_on": "eval:doc.generation_method == \"Periodic Refresh\"",
+   "fieldname": "next_refresh_dt",
+   "fieldtype": "Datetime",
+   "label": "Next Scheduled Refresh",
+   "no_copy": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "last_refresh_dt",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Last Refreshed On",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_nfvk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "report_contents_file",
+   "fieldtype": "Attach",
+   "label": "Report Contents File",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_execution_time",
+   "fieldtype": "Duration",
+   "hide_days": 1,
+   "label": "Last Execution Duration",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.generation_method == \"Periodic Refresh\"",
+   "fieldname": "refresh_schedule",
+   "fieldtype": "Table",
+   "label": "Refresh Schedule",
+   "options": "PowerBI Refresh Time"
+  },
+  {
+   "default": "1",
+   "depends_on": "eval:doc.generation_method == \"Periodic Refresh\" && doc.refresh_frequency == \"Weekly\"",
+   "fieldname": "weekly_monday",
+   "fieldtype": "Check",
+   "label": "Monday"
+  },
+  {
+   "default": "1",
+   "depends_on": "eval:doc.generation_method == \"Periodic Refresh\" && doc.refresh_frequency == \"Weekly\"",
+   "fieldname": "weekly_tuesday",
+   "fieldtype": "Check",
+   "label": "Tuesday"
+  },
+  {
+   "default": "1",
+   "depends_on": "eval:doc.generation_method == \"Periodic Refresh\" && doc.refresh_frequency == \"Weekly\"",
+   "fieldname": "weekly_wednesday",
+   "fieldtype": "Check",
+   "label": "Wednesday"
+  },
+  {
+   "default": "1",
+   "depends_on": "eval:doc.generation_method == \"Periodic Refresh\" && doc.refresh_frequency == \"Weekly\"",
+   "fieldname": "weekly_thursday",
+   "fieldtype": "Check",
+   "label": "Thursday"
+  },
+  {
+   "default": "1",
+   "depends_on": "eval:doc.generation_method == \"Periodic Refresh\" && doc.refresh_frequency == \"Weekly\"",
+   "fieldname": "weekly_friday",
+   "fieldtype": "Check",
+   "label": "Friday"
+  },
+  {
+   "default": "1",
+   "depends_on": "eval:doc.generation_method == \"Periodic Refresh\" && doc.refresh_frequency == \"Weekly\"",
+   "fieldname": "weekly_saturday",
+   "fieldtype": "Check",
+   "label": "Saturday"
+  },
+  {
+   "default": "1",
+   "depends_on": "eval:doc.generation_method == \"Periodic Refresh\" && doc.refresh_frequency == \"Weekly\"",
+   "fieldname": "weekly_sunday",
+   "fieldtype": "Check",
+   "label": "Sunday"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_executing",
+   "fieldtype": "Check",
+   "label": "Is Executing",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.generation_method == \"Periodic Refresh\"",
+   "fieldname": "grace_duration",
+   "fieldtype": "Duration",
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "Grace Duration before Scheduled Time"
+  },
+  {
+   "fieldname": "preview_json",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "label": "Preview JSON",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.generation_method == \"Periodic Refresh\"",
+   "fieldname": "pause_auto_refresh",
+   "fieldtype": "Check",
+   "label": "Pause Auto Refresh"
+  },
+  {
+   "fieldname": "error_section",
+   "fieldtype": "Section Break",
+   "label": "Error"
+  },
+  {
+   "depends_on": "retry",
+   "fieldname": "retry",
+   "fieldtype": "Int",
+   "label": "Retry",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "error",
+   "fieldtype": "Code",
+   "label": "Error",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 500,
  "links": [],
- "modified": "2026-07-11 16:52:39.968108",
+ "modified": "2026-07-12 18:14:49.102468",
  "modified_by": "Administrator",
  "module": "PowerBI Integration",
  "name": "PowerBI Report Source",

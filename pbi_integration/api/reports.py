@@ -5,6 +5,7 @@ import frappe
 from frappe import _
 from frappe import sbool, cint
 from frappe.desk.reportview import validate_args
+from frappe.utils.response import send_private_file
 
 
 @frappe.whitelist()
@@ -66,12 +67,21 @@ def get_report_source_content(
 		frappe.throw(_("filters must be a JSON object"))
 
 	doc = frappe.get_doc("PowerBI Report Source", report_source)
-	columns, result = doc.get_report_content(
-		limit=20 if for_preview else None,
-		user_filters=filters,
-	)
+	doc.check_permission("read")
 
-	return frappe._dict({
-		"columns": columns,
-		"result": result,
-	})
+	if not doc.enabled:
+		frappe.throw(_("Report is disabled"))
+
+	if for_preview:
+		return doc.get_report_preview(auto_commit=True)
+
+	if doc.generation_method == "Periodic Refresh" and doc.report_contents_file:
+		file_path = doc.report_contents_file.split("/private", 1)[1]
+		return send_private_file(file_path)
+
+	return doc.get_report_content(
+		user_filters=filters,
+		update_preview_data=not filters,
+		update_execution_time=True,
+		auto_commit=True,
+	)

@@ -10,6 +10,9 @@ frappe.ui.form.on("PowerBI Report Source", {
 			}
 		} else {
 			frm.add_custom_button(__("View Report"), () => frm.trigger("view_report"));
+			if (frm.doc.generation_method == "Periodic Refresh") {
+				frm.add_custom_button(__("Refresh Report Data"), () => frm.trigger("refresh_report_data"));
+			}
 		}
 	},
 
@@ -17,9 +20,13 @@ frappe.ui.form.on("PowerBI Report Source", {
 		if (frm.is_new() || !frm.doc.report || !frm.doc.name) {
 			return;
 		}
+		if (frm.doc.__unsaved) {
+			frappe.throw(__("You have unsaved changes in this form. Please save before you continue."));
+		}
 
 		if (frm.doc.report_type != "Report Builder") {
 			frappe.route_options = await frm.events.get_parsed_filters(frm) || {};
+			frappe.open_in_new_tab = true;
 			frappe.set_route("query-report", frm.doc.report);
 		}
 	},
@@ -29,6 +36,20 @@ frappe.ui.form.on("PowerBI Report Source", {
 			"pbi_integration.powerbi_integration.doctype.powerbi_report_source.powerbi_report_source.get_parsed_filters",
 			{report_source: frm.doc.name},
 		);
+	},
+
+	refresh_report_data(frm) {
+		if (frm.doc.__unsaved) {
+			frappe.throw(__("You have unsaved changes in this form. Please save before you continue."));
+		}
+
+		return frappe.call({
+			method: "pbi_integration.powerbi_integration.doctype.powerbi_report_source.powerbi_report_source.refresh_report_data",
+			args: {
+				report_source: frm.doc.name,
+			},
+			freeze: true,
+		});
 	},
 
 	report(frm) {

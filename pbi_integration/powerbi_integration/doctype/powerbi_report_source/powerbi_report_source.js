@@ -202,10 +202,12 @@ frappe.ui.form.on("PowerBI Report Source", {
 
 				// add filters defined in onload event of report
 				if (reference_report.onload) {
-					frappe.query_report = new frappe.views.QueryReport({
-						filters: dialog.fields_list,
-					});
-					reference_report.onload(frappe.query_report);
+					try {
+						frappe.query_report = new frappe.views.QueryReport({
+							filters: dialog.fields_list,
+						});
+						reference_report.onload(frappe.query_report);
+					} catch (e) {}
 				}
 
 				dialog.doc = dialog.doc || {};

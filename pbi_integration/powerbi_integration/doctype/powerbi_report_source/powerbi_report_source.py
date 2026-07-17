@@ -233,6 +233,7 @@ class PowerBIReportSource(Document):
 			as_dict=True,
 			ignore_prepared_report=True,
 			are_default_filters=False,
+			with_total_row=False,
 		)
 
 		if self.report_type == "Script Report":

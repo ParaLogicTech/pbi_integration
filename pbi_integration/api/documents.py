@@ -14,10 +14,10 @@ def get_doctypes(
 	limit_page_length=None,
 	**kwargs,
 ):
-	if frappe.session.data.user_type != "System User":
+	user_permissions = frappe.get_user()
+	if user_permissions.doc.user_type != "System User":
 		raise frappe.PermissionError
 
-	user_permissions = frappe.get_user()
 	can_read = user_permissions.get_can_read()
 	if not can_read:
 		return []
@@ -53,7 +53,8 @@ def get_doctypes(
 
 @frappe.whitelist()
 def get_doctype_meta(doctype):
-	if frappe.session.data.user_type != "System User":
+	user_permissions = frappe.get_user()
+	if user_permissions.doc.user_type != "System User":
 		raise frappe.PermissionError
 
 	frappe.has_permission(doctype, "read", throw=True)

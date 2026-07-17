@@ -17,10 +17,10 @@ def get_report_sources(
 	limit_page_length=None,
 	**kwargs,
 ):
-	if frappe.session.data.user_type != "System User":
+	user_permissions = frappe.get_user()
+	if user_permissions.doc.user_type != "System User":
 		raise frappe.PermissionError
 
-	user_permissions = frappe.get_user()
 	permitted_reports = user_permissions.get_all_reports()
 	if not permitted_reports:
 		return []

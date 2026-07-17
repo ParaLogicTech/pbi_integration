@@ -401,7 +401,9 @@ def create_report_file(report_source, data, field):
 		frappe.scrub(report_source),
 		frappe.utils.data.format_datetime(frappe.utils.now(), "y-M-d-H-m")
 	)
-	encoded_content = frappe.safe_encode(as_json(data))
+	encoded_content = frappe.safe_encode(as_json({
+		"message": data
+	}))
 
 	_file = frappe.get_doc({
 		"doctype": "File",

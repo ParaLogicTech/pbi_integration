@@ -228,7 +228,7 @@ class PowerBIReportSource(Document):
 		report = frappe.get_doc("Report", self.report)
 		columns, data = report.get_data(
 			limit=limit,
-			user=self.user,
+			user=self.owner,
 			filters=self.parsed_filters,
 			as_dict=True,
 			ignore_prepared_report=True,
@@ -439,3 +439,60 @@ def get_half_year_start(as_str=False):
 	result_date = datetime.date(year, month, day)
 
 	return result_date if not as_str else result_date.strftime("%Y-%m-%d")
+
+
+def get_permission_query_conditions(user):
+	if not user:
+		user = frappe.session.user
+
+	if user == "Administrator":
+		return
+
+	user_condition = f"`tabPowerBI Report Source`.`owner` = {frappe.db.escape(user)}"
+
+	permitted_reports = get_permitted_reports(user)
+	if not permitted_reports:
+		return user_condition
+
+	permitted_reports_str = ", ".join([frappe.db.escape(r) for r in permitted_reports])
+	permitted_report_condition = f"`tabPowerBI Report Source`.`report` in ({permitted_reports_str})"
+
+	shared_condition = f"""exists(select `tabDocShare`.name from `tabDocShare`
+		where `tabDocShare`.share_doctype = 'PowerBI Report Source'
+			and `tabDocShare`.share_name = `tabPowerBI Report Source`.name
+			and `tabDocShare`.user = {frappe.db.escape(user)})
+	"""
+
+	query = f"({user_condition} or {shared_condition} or (`tabPowerBI Report Source`.`public` = 1 and {permitted_report_condition}))"
+
+	return query
+
+
+def has_permission(doc, ptype=None, user=None):
+	if not user:
+		user = frappe.session.user
+
+	if user == "Administrator":
+		return True
+	if doc.owner == user:
+		return True
+
+	permitted_reports = get_permitted_reports(user)
+	if doc.report not in permitted_reports:
+		return False
+
+	if user != doc.owner and not doc.public:
+		return False
+
+
+def get_permitted_reports(user):
+	if not user:
+		user = frappe.session.user
+
+	if user == frappe.session.user:
+		user_permissions = frappe.get_user()
+	else:
+		from frappe.utils.user import UserPermissions
+		user_permissions = UserPermissions(user)
+
+	return user_permissions.get_all_reports()

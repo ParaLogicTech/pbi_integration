@@ -17,13 +17,6 @@ def get_report_sources(
 	limit_page_length=None,
 	**kwargs,
 ):
-	user_permissions = frappe.get_user()
-	if user_permissions.doc.user_type != "System User":
-		raise frappe.PermissionError
-
-	permitted_reports = user_permissions.get_all_reports()
-	if not permitted_reports:
-		return []
 
 	filters = frappe.parse_json(filters)
 	if not filters:
@@ -32,14 +25,8 @@ def get_report_sources(
 	# Filter by permitted reports permissions
 	if isinstance(filters, list):
 		filters.append(["PowerBI Report Source", "enabled", "=", 1])
-		filters.append(["PowerBI Report Source", "report", "in", permitted_reports])
 	elif isinstance(filters, dict):
 		filters["enabled"] = 1
-		if filters.get("report"):
-			if filters.get("report") not in permitted_reports:
-				return []
-		else:
-			filters["report"] = ["in", permitted_reports]
 
 	args = frappe._dict(
 		doctype="PowerBI Report Source",
@@ -51,7 +38,7 @@ def get_report_sources(
 	)
 
 	validate_args(args)
-	return frappe.get_all(**args)
+	return frappe.get_list(**args)
 
 
 @frappe.whitelist()

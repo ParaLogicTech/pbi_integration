@@ -12,3 +12,11 @@ scheduler_events = {
 		"pbi_integration.powerbi_integration.doctype.powerbi_report_source.powerbi_report_source.enqueue_auto_refresh_report_sources",
 	]
 }
+
+permission_query_conditions = {
+	"PowerBI Report Source": "pbi_integration.powerbi_integration.doctype.powerbi_report_source.powerbi_report_source.get_permission_query_conditions",
+}
+
+has_permission = {
+	"PowerBI Report Source": "pbi_integration.powerbi_integration.doctype.powerbi_report_source.powerbi_report_source.has_permission",
+}

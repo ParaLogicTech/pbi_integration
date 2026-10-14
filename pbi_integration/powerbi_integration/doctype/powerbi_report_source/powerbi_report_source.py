@@ -15,11 +15,11 @@ from frappe.utils import (
 	cint,
 	get_time,
 	now_datetime,
-	combine_datetime,
 	add_days,
 	get_datetime,
 	format_duration,
 )
+from pbi_integration.utils import combine_datetime
 import datetime
 
 
@@ -237,8 +237,9 @@ class PowerBIReportSource(Document):
 		)
 
 		if self.report_type == "Script Report":
-			from frappe.desk.query_report import flatten_grouped_report_data
-			data = flatten_grouped_report_data(data)
+			if hasattr(frappe.desk.query_report, "flatten_grouped_report_data"):
+				from frappe.desk.query_report import flatten_grouped_report_data
+				data = flatten_grouped_report_data(data)
 
 		execution_time = (datetime.datetime.now() - start_time).total_seconds()
 		if update_execution_time:
